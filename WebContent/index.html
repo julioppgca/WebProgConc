@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="styles/styles.css">
+
+<title>Producer Consumer Animation - PPGCA</title>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:10px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+
+
+<body>
+
+<table id="t01">
+  <tr>
+    <th>Producer</th>
+    <th>Buffer</th> 
+    <th>Consumer</th>
+  </tr>
+	  
+	<tr>
+	<td>Speed
+	<select id=ProdAnimSpeed > 
+	  <option value="3000">Slow</option>
+	  <option value="1000">Med.</option>
+	  <option value="500">Fast</option>
+	</select>
+	</td>
+
+<td>Size
+	<select id=BufferSize > 
+	  <option value="3">3 Pos.</option>
+	  <option value="5">5 Pos.</option>
+	  <option value="7">7 Pos.</option>
+	</select>
+</td>
+
+<td>Speed
+<select id=ConsAnimSpeed > 
+  <option value="1">Slow</option>
+  <option value="2">Med.</option>
+  <option value="5">Fast</option>
+</select>
+</td>
+
+</tr>
+
+<tr>
+<td>Produce
+ <select id=Item2Produce > 
+  <option value="10">10 Items</option>
+  <option value="15">15 Items</option>
+  <option value="25">25 Items</option>
+</select>
+</td>
+
+<td> 
+<button onclick="stopGame()">Reset</button>
+<button onclick="startGame()">Go</button>
+</td>
+
+<td> 
+</td>
+</tr>
+
+</table>
+
+<canvas id="container"></canvas>
+
+<script>
+
+//Animate speed adjust
+const AnimateSpeed = 10;
+
+//limits
+const maxX=800;
+const maxY=400;
+
+const bufferXsize=65;
+const bufferYsize=400;
+const bufferXpos=maxX/2-bufferXsize/2;
+const bufferYpos=0;
+
+const itemSize=50;
+
+var producer;
+var consumer;
+var buffer;
+
+var bufferControl=0;
+
+function startGame() {
+  
+    myGameArea.start();
+    produceItem();
+    producer=new component(150, 300,  "#8ae234" , 0, 50, 0, "Producer");
+    consumer=new component(150, 300, "#ef2929", 650, 50, 0, "Consumer");
+    buffer=new component(bufferXsize, bufferYsize, "#729fcf",bufferXpos, bufferYpos, 0, "Buffer");
+    
+}
+
+function stopGame(){
+	myGameArea.stop();
+	myGameArea.clear();	
+	prod=[];
+}
+
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+//items to produce
+var prod=[];
+var i = 0;
+
+/* function produceItem(){
+	    var ins = setInterval(function(){
+		prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,"P"+(i+1)));
+		i++;
+		console.log(i);
+		if(i>=parseInt(document.getElementById("Item2Produce").value)) clearInterval(ins);
+		},document.getElementById("ProdAnimSpeed").value);
+
+} */
+
+//var tmrProduce = setInterval(produceItem(),document.getElementById("ProdAnimSpeed").value)
+
+function produceItem(){
+
+		if(i++<=parseInt(document.getElementById("Item2Produce").value)) 
+			{
+			setInterval(function(){
+				if(bufferControl++<document.getElementById("BufferSize").value) {
+					prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,(i+1)));
+		    	
+		    	}
+
+			},document.getElementById("ProdAnimSpeed").value)
+		}
+	
+}
+
+ var j=0;
+function consumeItem(){
+			setInterval(function(){console.log("Consumir");
+				if(bufferControl++<document.getElementById("BufferSize").value) {
+					//prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,"P"+(i+1)));
+		    		buffer.update(i-1);
+		    	}	
+			},document.getElementById("ConsAnimSpeed").value)
+} 
+
+var myGameArea = {
+    //canvas : document.createElement("canvas"),
+    
+    canvas : document.getElementById("container"),
+    start : function() {
+        this.canvas.width = 800;
+        this.canvas.height = 400;
+        this.context = this.canvas.getContext("2d");
+        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
+        this.interval = setInterval(updateGameArea, AnimateSpeed);
+ 
+    },
+    stop : function() {
+        clearInterval(this.interval);
+    },    
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    }
+}
+
+function component(width, height, color, x, y, speed, type) {
+    this.width = width;
+    this.height = height;
+    this.angle = 0;
+    this.speed = speed;
+    this.x = x;
+    this.y = y;
+    this.type=type;
+   
+    this.update = function(item){
+        ctx = myGameArea.context;
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        
+        ctx.font = "22px Arial";
+        if(type) {
+        	ctx.fillStyle = "white";
+        	ctx.textAlign = "center";
+        	if(type=="Buffer") 
+        	{
+        		if (item) ctx.fillText(type+" "+item,this.x+this.width/2,30);
+        		else ctx.fillText(type,this.x+this.width/2,30);
+        	}
+        	else if(item) ctx.fillText(type+" "+item,this.x+this.width/2,this.y+this.height/2);
+
+        	else ctx.fillText(type,this.x+this.width/2,this.y+this.height/2);
+        }
+    }
+    this.newPos = function() {
+        this.x += this.speed * Math.sin(this.angle);
+        this.y -= this.speed * Math.cos(this.angle);
+    }
+    
+    this.move2buffer = function(){
+    	var bufferSize = document.getElementById("BufferSize").value;
+    	if(this.x<(bufferXpos+bufferXsize/2)-itemSize/2)this.x +=this.speed;
+    	else this.y = this.type*itemSize;
+    }
+  	
+    this.move2Consumer = function(){
+    	if(this.x<750)this.x +=this.speed;
+    	
+    }
+
+}
+
+function updateGameArea() {
+    myGameArea.clear();
+   	producer.update();
+   	consumer.update();
+   	buffer.update();
+    for(i=0;i<prod.length;i++){
+    	prod[i].move2buffer();
+    	//buffer.update(i+1);
+    	prod[i].update();
+    }
+}
+
+</script>
+
+</body>
+</html>
