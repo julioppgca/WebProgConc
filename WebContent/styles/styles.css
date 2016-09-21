@@ -18,6 +18,17 @@ table#t01 th {
     color: white;
 }
 
+#header{
+	width: 800px;
+	 text-align: center;
+	 border:2px solid #d3d3d3;
+}
+
+#text{
+	width: 800px;
+	text-align: justify;
+}
+
 #container {
   width: 800px;
   height: 400px;
