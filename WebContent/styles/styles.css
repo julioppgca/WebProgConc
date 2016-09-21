@@ -18,13 +18,26 @@ table#t01 th {
     color: white;
 }
 
-#header{
+#headerE{
 	width: 800px;
 	 text-align: center;
 	 border:2px solid #d3d3d3;
 }
 
-#text{
+#headerP{
+	width: 800px;
+	 text-align: center;
+	 border:2px solid #d3d3d3;
+}
+
+
+#textP{
+	width: 800px;
+	text-align: justify;
+	
+}
+
+#textE{
 	width: 800px;
 	text-align: justify;
 }

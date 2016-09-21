@@ -25,8 +25,9 @@ canvas {
 	</tr>
 </table>
 
-<H1 id="header"> Producer Consumer Problem</H1>
-<div id=text>
+<H1 id="headerE"> Producer Consumer Problem</H1>
+<H1 id="headerP" hidden=true> O Problema do Produtor e Consumidor</H1>
+<div id=textE> 
 In computing, the producer–consumer problem (also known as the bounded-buffer problem) 
 is a classic example of a multi-process synchronization problem. The problem describes two processes, 
 the producer and the consumer, who share a common, fixed-size buffer used as a queue. 
@@ -43,8 +44,25 @@ it wakes up the sleeping consumer. The solution can be reached by means of inter
 typically using semaphores. An inadequate solution could result in a deadlock where both processes 
 are waiting to be awakened. The problem can also be generalized to have multiple producers and consumers.
 </div> <br>
+<div id="textP" hidden=true>
+Em computação, o problema do produtor-consumidor (também conhecido como o problema limitado-tampão)
+é um exemplo clássico de um problema de sincronização multi-processo. O problema descreve dois processos,
+o produtor eo consumidor, que compartilham um buffer comum, de tamanho fixo usado como uma fila.
+O trabalho do produtor é gerar dados, colocá-lo no buffer, e começar novamente. Ao mesmo tempo,
+o consumidor está a consumir os dados (isto é, retirando-a do tampão),
+uma peça de cada vez. O problema é ter certeza de que o produtor não vai tentar adicionar dados para o buffer
+Se ele está cheio e que o consumidor não vai tentar remover dados de um buffer vazio.
 
-<table id="t01">
+A solução para o produtor, quer seja para ir dormir ou descartar dados se o buffer está cheio.
+A próxima vez que o consumidor retira um item do buffer, ele notifica o produtor,
+que começa a encher de novo o tampão. Da mesma forma, o consumidor pode ir dormir se
+encontra o buffer estar vazio. A próxima vez que o produtor coloca os dados no buffer,
+acorda o consumidor dormir. A solução pode ser alcançada por meio de comunicação entre processos,
+tipicamente utilizando semáforos. Uma solução inadequada poderia resultar num bloqueio em que ambos os processos
+estão à espera de ser despertado. O problema também pode ser generalizada para ter vários produtores e consumidores.
+</div><br>
+
+<table id="t01" >
   <tr>
     <th>Producer</th>
     <th>Buffer</th> 
@@ -102,6 +120,20 @@ are waiting to be awakened. The problem can also be generalized to have multiple
 
 <script>
 
+function ChangeLangPor(){
+	document.getElementById("headerP").hidden=false;
+	document.getElementById("textP").hidden=false;
+	document.getElementById("textE").hidden=true;
+	document.getElementById("headerE").hidden=true;
+}
+
+function ChangeLangEng(){
+	document.getElementById("headerP").hidden=true;
+	document.getElementById("textP").hidden=true;
+	document.getElementById("textE").hidden=false;
+	document.getElementById("headerE").hidden=false;
+}
+
 //Animate speed adjust
 const AnimateSpeed = 10;
 
@@ -133,10 +165,12 @@ function startGame() {
 }
 
 function stopGame(){
-	//myGameArea.stop();
-	//myGameArea.clear();	
-	//prod=[];
-	location.reload();
+	myGameArea.stop();
+	myGameArea.clear();	
+	prod=[];
+	i=0;
+	bufferControl=0;
+	//location.reload();
 }
 
 
