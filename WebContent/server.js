@@ -1,16 +1,20 @@
-var app = require('http').createServer(handler);
+var http = require('http');   
 var fs = require('fs');
 
-app.listen(8095);
+const PORT = 8095;
 
-function handler (req, res) {
-  fs.readFile('index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Erro ao abrir o arquivo: index.html');
-    }
-    res.writeHead(200);
-    res.end(data);
-  });
-}
+   http.createServer(function (req, res) {
+      var content = '';
+      var type = '';
+      if(req.url === '/') {
+         content = fs.readFileSync('./index.html');
+         type = 'text/html';
+      } else if(req.url === '/styles.css') {
+         content = fs.readFileSync('styles/styles.css');
+         type = 'text/css';
+      }
+      res.writeHead(200, {'Content-Type': type});
+      res.end(content + '\n');
+   }).listen(PORT);
+   console.log('Server running at http://127.0.0.1:'+PORT+'/');
+
