@@ -71,11 +71,12 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 	  
 	<tr>
 	<td>Speed
-	<select id=ProdAnimSpeed > 
+	<input type="range" id="ProdAnimSpeed" min="3" max="13" value="3">
+<!-- 	<select id=ProdAnimSpeed > 
 	  <option value="3">Slow</option>
 	  <option value="5">Med.</option>
 	  <option value="7">Fast</option>
-	</select>
+	</select> -->
 	</td>
 
 <td>Size
@@ -87,11 +88,12 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 </td>
 
 <td>Speed
-<select id=ConsAnimSpeed > 
+<input type="range" id="ConsAnimSpeed" min="1" max="10" value="1">
+<!-- <select id=ConsAnimSpeed > 
   <option value="1">Slow</option>
   <option value="2">Med.</option>
   <option value="4">Fast</option>
-</select>
+</select> -->
 </td>
 
 </tr>
@@ -163,7 +165,6 @@ var dest;
 var bufferPosIn=0;
 var producerStatus="Blocked";
 var consumerStatus="Blocked";
-var flag=1;
 /*---------------------------------------------
   				Init  Functions
 ---------------------------------------------*/
@@ -171,7 +172,6 @@ function startGame() {
   	console.log("Starting...");
     myGameArea.start();
     produceItem();
-    //consumeItem();
     producer=new component(150, 300,  "#008000" , 0, 50, 0, "Producer");
     consumer=new component(150, 300, "#ef2929", 650, 50, 0, "Consumer");
     buffer=new component(bufferXsize, bufferYsize, "#729fcf",bufferXpos, bufferYpos, 0, "Buffer");
@@ -179,15 +179,22 @@ function startGame() {
 }
 function stopGame(){
 	myGameArea.stop();
-	myGameArea.clear();	
-	prod=[];
-	i=0;
+	myGameArea.clear();
+	for (var i = 1; i < 10; i++)
+        window.clearInterval(i);
 	bufferControl=0;
+	prod=[];
+	i = 0;
+	j = 0;
+	dest;
+	bufferPosIn=0;
+	producerStatus="Blocked";
+	consumerStatus="Blocked";
+	console.log("Aborted or Reseted :P")
 	//location.reload();
 }
 var myGameArea = {
 	    //canvas : document.createElement("canvas"),
-	    
 	    canvas : document.getElementById("container"),
 	    start : function() {
 	        this.canvas.width = 800;
@@ -195,8 +202,7 @@ var myGameArea = {
 	        this.context = this.canvas.getContext("2d");
 	        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	        this.frameNo = 0;
-	        this.interval = setInterval(updateGameArea, AnimateSpeed);
-	 
+	        this.interval = setInterval(updateGameArea, AnimateSpeed); 
 	    },
 	    stop : function() {
 	        clearInterval(this.interval);
@@ -205,6 +211,7 @@ var myGameArea = {
 	        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	    }
 	}
+	
 function component(width, height, color, x, y, speed, type) {
     this.width = width;
     this.height = height;
@@ -225,12 +232,7 @@ function component(width, height, color, x, y, speed, type) {
         if(type) {
         	ctx.fillStyle = "white";
         	ctx.textAlign = "center";
-        	/*if(item) 
-        	{
-        		if (item) ctx.fillText(type,this.x+this.width/2,20);
-        		else ctx.fillText("["+item+"]",this.x+this.width/2,35);
-        	}
-        	else*/ if(typeof item != "undefined") {
+   			if(typeof item != "undefined") {
         		ctx.fillText(type,this.x+this.width/2,this.y+20);//+this.height/2); 
         		ctx.fillStyle = "yellow";
         		ctx.fillText(item,this.x+this.width/2,this.y+42);//+this.height/2);
@@ -248,39 +250,28 @@ function component(width, height, color, x, y, speed, type) {
     	{
     	if(this.x<(bufferXpos+bufferXsize/2)-itemSize/2)	this.x +=speed;
     	else if (this.buffer==0){
-    		//if(i>document.getElementById("BufferSize").value)
-    		//if(bufferControl<document.getElementById("BufferSize").value) 
-    			{
     			bufferControl++;
     			bufferPosIn++;
-    			console.log("Buf. Pos.: " + bufferPosIn+"Max: "+parseInt(document.getElementById("BufferSize").value));
     			this.y = bufferPosIn*itemSize;
     			if(bufferPosIn>=parseInt(document.getElementById("BufferSize").value)) bufferPosIn=0;
-    			}
-    		this.buffer=1;
-    		this.lbuffer=1;
-    		//bufferControl++;
-    		//consumeItem();//dest="move2consumer";
+    			this.buffer=1;
+    			this.lbuffer=1;
     		console.log("Buffer Count:" + bufferControl);	
     		}
     	}
     	else if(dest=="move2consumer")
     	{
-    		//console.log("consumer move");
     		if((this.x<700)){
     			this.y = 150;
-    			this.x +=speed;//this.speed;  
+    			this.x +=speed; 
  				if(this.lbuffer==1){
  					this.lbuffer=0;
  					bufferControl--;
  				}
     		}
-    		//if(this.lbuffer==1){this.lbuffer=0;bufferControl--; }
     		else if(this.angle == 0){
     			this.angle=1;
-    			//bufferControl--;
     			this.y = this.type*itemSize;
-    			//console.log("Buffer -:"+bufferControl);
     			if(j+1<document.getElementById("Item2Produce").value){
     				j++;
     				console.log("Item consumed: "+j);
@@ -292,12 +283,9 @@ function component(width, height, color, x, y, speed, type) {
     			   	consumer.update(consumerStatus);
     			   	buffer.update(bufferControl);
     				myGameArea.stop();
-    				console.log("Fim.");
-    			}
-    			
-    			
-    		}
-    		    	
+    				console.log("End.");
+    			}			
+    		}	    	
     	}
     }
 }
@@ -313,7 +301,6 @@ function updateGameArea() {
     	prod[i].update();
     }
    	if(i>j+1){
-   		//if(bufferControl>0){
    	dest="move2consumer";
    	consumerStatus="Running"
    	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));//1);//document.getElementById("ConsAnimSpeed").value);
@@ -333,13 +320,10 @@ function updateGameArea() {
    	else if(bufferControl==0)
    		{
    		consumerStatus="Blocked"
-   		//flag=1;
    		}
-   
-	//console.log("i: "+i+" j: "+j);
-}
-   	//console.log(parseInt(document.getElementById("ConsAnimSpeed").value));
 
+}
+   	
 /*---------------------------------------------
 	 Fancy thing  - get a random collor
 ---------------------------------------------*/
@@ -351,6 +335,7 @@ function getRandomColor() {
     }
     return color;
 }
+
 /*---------------------------------------------
 				Produce Item
 ---------------------------------------------*/
@@ -363,44 +348,21 @@ function produceItem(){
 			{console.log("B size: " + parseInt(document.getElementById("BufferSize").value)+" Actual: "+bufferControl);
 			prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,(i+1)));
 			dest="move2buffer";
-			//bufferControl++;
-			//consumeItem();
-			console.log("Produced..: "+i+1);
+			console.log("Produced: "+(i+1));
 			producerStatus="Running";
 			}
 		else if(i==document.getElementById("Item2Produce").value) producerStatus="End";
-		else {producerStatus="Blocked";}// clearInterval(produceTimer);}
-		},2500)//document.getElementById("ProdAnimSpeed").value)
-	}else {clearInterval(produceTimer);	producerStatus="End";}
+		else {producerStatus="Blocked";}
+		},2500);
+	}//else {clearInterval(produceTimer);	producerStatus="End";}
 }
-/*---------------------------------------------
-				Consume Item
----------------------------------------------*/
-/*
-function consumeItem(){
-			setInterval(function(){console.log("Consumir");
-				if(bufferControl>0) {
-					dest="move2consumer";
-					//console.log(dest);
-					//prod[j].move(dest,0.5);
-		   			//prod[j].update();
-		    	}	
-			},1000);//document.getElementById("ConsAnimSpeed").value)
-}*/
-/* var toggle=1;
-setInterval(function(){
-	 
-	if(toggle){
-		dest="move2buffer";//produceItem();
-		toggle=0;
-	}
-	else{
-		consumeItem();
-		toggle=1;
-	}
-	
-}, 1000) */
+
 </script>
 
+<footer>
+  <p>Created by: Julio Santos</p>
+  <p>PPGCA</p>
+  <p>Contact information: <a href="mailto:julio.ppgca@gmail.com">julio.ppgca@gmail.com</a>.</p>
+</footer>
 </body>
 </html>
