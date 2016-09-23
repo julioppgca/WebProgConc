@@ -90,7 +90,7 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 <select id=ConsAnimSpeed > 
   <option value="1">Slow</option>
   <option value="2">Med.</option>
-  <option value="5">Fast</option>
+  <option value="4">Fast</option>
 </select>
 </td>
 
@@ -120,13 +120,17 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 
 <script>
 
+/*---------------------------------------------
+ 
+ 			Language Settings
+ 
+ ---------------------------------------------*/
 function ChangeLangPor(){
 	document.getElementById("headerP").hidden=false;
 	document.getElementById("textP").hidden=false;
 	document.getElementById("textE").hidden=true;
 	document.getElementById("headerE").hidden=true;
 }
-
 function ChangeLangEng(){
 	document.getElementById("headerP").hidden=true;
 	document.getElementById("textP").hidden=true;
@@ -134,36 +138,51 @@ function ChangeLangEng(){
 	document.getElementById("headerE").hidden=false;
 }
 
+/*---------------------------------------------
+
+		Constant Parameters Definition
+
+---------------------------------------------*/
 //Animate speed adjust
-const AnimateSpeed = 10;
+const AnimateSpeed = 20;
 
 //limits
 const maxX=800;
 const maxY=400;
-
 const bufferXsize=65;
 const bufferYsize=400;
 const bufferXpos=maxX/2-bufferXsize/2;
 const bufferYpos=0;
-
 const itemSize=50;
 
+/*---------------------------------------------
+
+			Global Variables
+
+---------------------------------------------*/
 var producer;
 var consumer;
 var buffer;
-
 var bufferControl=0;
+var prod=[];
+var i = 0;
+var j=0;
+var dest;
+/*---------------------------------------------
 
+  				Init  Functions
+
+---------------------------------------------*/
 function startGame() {
   
     myGameArea.start();
     produceItem();
+    //consumeItem();
     producer=new component(150, 300,  "#8ae234" , 0, 50, 0, "Producer");
     consumer=new component(150, 300, "#ef2929", 650, 50, 0, "Consumer");
     buffer=new component(bufferXsize, bufferYsize, "#729fcf",bufferXpos, bufferYpos, 0, "Buffer");
     
 }
-
 function stopGame(){
 	myGameArea.stop();
 	myGameArea.clear();	
@@ -173,84 +192,34 @@ function stopGame(){
 	//location.reload();
 }
 
-
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-//items to produce
-var prod=[];
-var i = 0;
-
-/* function produceItem(){
-	    var ins = setInterval(function(){
-		prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,"P"+(i+1)));
-		i++;
-		console.log(i);
-		if(i>=parseInt(document.getElementById("Item2Produce").value)) clearInterval(ins);
-		},document.getElementById("ProdAnimSpeed").value);
-
-} */
-
-//var tmrProduce = setInterval(produceItem(),document.getElementById("ProdAnimSpeed").value)
-
-function produceItem(){
-
-		if(i++<=parseInt(document.getElementById("Item2Produce").value)) 
-			{
-			setInterval(function(){
-				if(bufferControl++<document.getElementById("BufferSize").value) {
-					prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,(i+1)));
-		    	
-		    	}
-
-			},document.getElementById("ProdAnimSpeed").value)
-		}
-	
-}
-
- var j=0;
-function consumeItem(){
-			setInterval(function(){console.log("Consumir");
-				if(bufferControl++<document.getElementById("BufferSize").value) {
-					//prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,"P"+(i+1)));
-		    		buffer.update(i-1);
-		    	}	
-			},document.getElementById("ConsAnimSpeed").value)
-} 
-
 var myGameArea = {
-    //canvas : document.createElement("canvas"),
-    
-    canvas : document.getElementById("container"),
-    start : function() {
-        this.canvas.width = 800;
-        this.canvas.height = 400;
-        this.context = this.canvas.getContext("2d");
-        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, AnimateSpeed);
- 
-    },
-    stop : function() {
-        clearInterval(this.interval);
-    },    
-    clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    }
-}
+	    //canvas : document.createElement("canvas"),
+	    
+	    canvas : document.getElementById("container"),
+	    start : function() {
+	        this.canvas.width = 800;
+	        this.canvas.height = 400;
+	        this.context = this.canvas.getContext("2d");
+	        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+	        this.frameNo = 0;
+	        this.interval = setInterval(updateGameArea, AnimateSpeed);
+	 
+	    },
+	    stop : function() {
+	        clearInterval(this.interval);
+	    },    
+	    clear : function() {
+	        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	    }
+	}
 
 function component(width, height, color, x, y, speed, type) {
     this.width = width;
     this.height = height;
     this.angle = 0;
     this.speed = speed;
+    this.buffer = 0;
+    this.lbuffer = 1;
     this.x = x;
     this.y = y;
     this.type=type;
@@ -270,7 +239,6 @@ function component(width, height, color, x, y, speed, type) {
         		else ctx.fillText(type,this.x+this.width/2,30);
         	}
         	else if(item) ctx.fillText(type+" "+item,this.x+this.width/2,this.y+this.height/2);
-
         	else ctx.fillText(type,this.x+this.width/2,this.y+this.height/2);
         }
     }
@@ -279,15 +247,41 @@ function component(width, height, color, x, y, speed, type) {
         this.y -= this.speed * Math.cos(this.angle);
     }
     
-    this.move2buffer = function(){
-    	var bufferSize = document.getElementById("BufferSize").value;
-    	if(this.x<(bufferXpos+bufferXsize/2)-itemSize/2)this.x +=this.speed;
-    	else this.y = this.type*itemSize;
-    }
-  	
-    this.move2Consumer = function(){
-    	if(this.x<750)this.x +=this.speed;
-    	
+    this.move = function(dest,speed){
+    	if(dest=="move2buffer")
+    	{
+    	if(this.x<(bufferXpos+bufferXsize/2)-itemSize/2)	this.x +=speed;
+    	else if (this.buffer==0){
+    		//if(i>document.getElementById("BufferSize").value)
+    		this.y = this.type*itemSize;
+    		this.buffer=1;
+    		//bufferControl++;
+    		//consumeItem();//dest="move2consumer";
+    		console.log("Buffer +:"+bufferControl);	
+    		}
+    	}
+    	else if(dest=="move2consumer")
+    	{
+    		//console.log("consumer move");
+    		if(this.x<750){
+    			this.y = 150;
+    			this.x +=speed;//this.speed;  
+ 				if(this.lbuffer==1){
+ 					this.lbuffer=0;
+ 					bufferControl--;
+ 				}
+    		}
+    		//if(this.lbuffer==1){this.lbuffer=0;bufferControl--; }
+    		else if(this.angle == 0){
+    			this.angle=1;
+    			//bufferControl--;
+    			this.y = this.type*itemSize;
+    			console.log("Buffer -:"+bufferControl);
+    			if(j<document.getElementById("Item2Produce").value)j++;
+    			console.log("Item arrived: "+j);
+    		}
+    		    	
+    	}
     }
 
 }
@@ -297,12 +291,90 @@ function updateGameArea() {
    	producer.update();
    	consumer.update();
    	buffer.update();
-    for(i=0;i<prod.length;i++){
-    	prod[i].move2buffer();
-    	//buffer.update(i+1);
+    
+   	for(i=j;i<prod.length;i++)
+   	{
+   		prod[i].move(dest,2);
     	prod[i].update();
     }
+   	if(i>1){
+   	dest="move2consumer";
+   	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));//1);//document.getElementById("ConsAnimSpeed").value);
+	prod[j].update();
+	dest="move2buffer";}
+   	//console.log(parseInt(document.getElementById("ConsAnimSpeed").value));
 }
+
+/*---------------------------------------------
+
+	 Fancy thing  - get a random collor
+
+---------------------------------------------*/
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+
+/*---------------------------------------------
+
+				Produce Item
+
+---------------------------------------------*/
+function produceItem(){
+	if(i++<=document.getElementById("Item2Produce").value) 
+	{
+		console.log("Max: " + document.getElementById("Item2Produce").value);
+		var produceTimer = setInterval(function(){
+		if((bufferControl<document.getElementById("BufferSize").value)&(i<document.getElementById("Item2Produce").value) )
+			{
+			prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,(i+1)));
+			dest="move2buffer";
+			bufferControl++;
+			//consumeItem();
+			console.log("Produced..: "+i);
+			}
+		//else clearInterval(produceTimer);
+		},document.getElementById("ProdAnimSpeed").value)
+	}else clearInterval(produceTimer);	
+}
+
+/*---------------------------------------------
+
+				Consume Item
+
+---------------------------------------------*/
+/*
+function consumeItem(){
+			setInterval(function(){console.log("Consumir");
+				if(bufferControl>0) {
+					dest="move2consumer";
+					//console.log(dest);
+					//prod[j].move(dest,0.5);
+		   			//prod[j].update();
+		    	}	
+			},1000);//document.getElementById("ConsAnimSpeed").value)
+}*/
+
+/* var toggle=1;
+setInterval(function(){
+	 
+	if(toggle){
+		dest="move2buffer";//produceItem();
+		toggle=0;
+	}
+	else{
+		consumeItem();
+		toggle=1;
+	}
+	
+}, 1000) */
+
 
 </script>
 
