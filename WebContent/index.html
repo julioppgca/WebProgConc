@@ -72,9 +72,9 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 	<tr>
 	<td>Speed
 	<select id=ProdAnimSpeed > 
-	  <option value="3000">Slow</option>
-	  <option value="1000">Med.</option>
-	  <option value="500">Fast</option>
+	  <option value="3">Slow</option>
+	  <option value="5">Med.</option>
+	  <option value="7">Fast</option>
 	</select>
 	</td>
 
@@ -119,7 +119,6 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 <canvas id="container"></canvas>
 
 <script>
-
 /*---------------------------------------------
  
  			Language Settings
@@ -137,15 +136,11 @@ function ChangeLangEng(){
 	document.getElementById("textE").hidden=false;
 	document.getElementById("headerE").hidden=false;
 }
-
 /*---------------------------------------------
-
 		Constant Parameters Definition
-
 ---------------------------------------------*/
 //Animate speed adjust
 const AnimateSpeed = 20;
-
 //limits
 const maxX=800;
 const maxY=400;
@@ -154,11 +149,8 @@ const bufferYsize=400;
 const bufferXpos=maxX/2-bufferXsize/2;
 const bufferYpos=0;
 const itemSize=50;
-
 /*---------------------------------------------
-
 			Global Variables
-
 ---------------------------------------------*/
 var producer;
 var consumer;
@@ -166,15 +158,17 @@ var buffer;
 var bufferControl=0;
 var prod=[];
 var i = 0;
-var j=0;
+var j = 0;
 var dest;
+var bufferPosIn=0;
+var producerStatus="Blocked";
+var consumerStatus="Blocked";
+var flag=1;
 /*---------------------------------------------
-
   				Init  Functions
-
 ---------------------------------------------*/
 function startGame() {
-  
+  	console.log("Starting...");
     myGameArea.start();
     produceItem();
     //consumeItem();
@@ -191,7 +185,6 @@ function stopGame(){
 	bufferControl=0;
 	//location.reload();
 }
-
 var myGameArea = {
 	    //canvas : document.createElement("canvas"),
 	    
@@ -212,14 +205,13 @@ var myGameArea = {
 	        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	    }
 	}
-
 function component(width, height, color, x, y, speed, type) {
     this.width = width;
     this.height = height;
     this.angle = 0;
     this.speed = speed;
     this.buffer = 0;
-    this.lbuffer = 1;
+    this.lbuffer = 0;
     this.x = x;
     this.y = y;
     this.type=type;
@@ -233,13 +225,17 @@ function component(width, height, color, x, y, speed, type) {
         if(type) {
         	ctx.fillStyle = "white";
         	ctx.textAlign = "center";
-        	if(type=="Buffer") 
+        	/*if(item) 
         	{
-        		if (item) ctx.fillText(type+" "+item,this.x+this.width/2,30);
-        		else ctx.fillText(type,this.x+this.width/2,30);
+        		if (item) ctx.fillText(type,this.x+this.width/2,20);
+        		else ctx.fillText("["+item+"]",this.x+this.width/2,35);
         	}
-        	else if(item) ctx.fillText(type+" "+item,this.x+this.width/2,this.y+this.height/2);
-        	else ctx.fillText(type,this.x+this.width/2,this.y+this.height/2);
+        	else*/ if(typeof item != "undefined") {
+        		ctx.fillText(type,this.x+this.width/2,this.y+20);//+this.height/2); 
+        		ctx.fillStyle = "yellow";
+        		ctx.fillText(item,this.x+this.width/2,this.y+42);//+this.height/2);
+        		}
+        	else ctx.fillText(type,this.x+this.width/2,this.y+20);//this.height/2);
         }
     }
     this.newPos = function() {
@@ -253,17 +249,25 @@ function component(width, height, color, x, y, speed, type) {
     	if(this.x<(bufferXpos+bufferXsize/2)-itemSize/2)	this.x +=speed;
     	else if (this.buffer==0){
     		//if(i>document.getElementById("BufferSize").value)
-    		this.y = this.type*itemSize;
+    		//if(bufferControl<document.getElementById("BufferSize").value) 
+    			{
+    			bufferControl++;
+    			bufferPosIn++;
+    			console.log("Buf. Pos.: " + bufferPosIn+"Max: "+parseInt(document.getElementById("BufferSize").value));
+    			this.y = bufferPosIn*itemSize;
+    			if(bufferPosIn>=parseInt(document.getElementById("BufferSize").value)) bufferPosIn=0;
+    			}
     		this.buffer=1;
+    		this.lbuffer=1;
     		//bufferControl++;
     		//consumeItem();//dest="move2consumer";
-    		console.log("Buffer +:"+bufferControl);	
+    		console.log("Buffer Count:" + bufferControl);	
     		}
     	}
     	else if(dest=="move2consumer")
     	{
     		//console.log("consumer move");
-    		if(this.x<750){
+    		if((this.x<700)){
     			this.y = 150;
     			this.x +=speed;//this.speed;  
  				if(this.lbuffer==1){
@@ -276,41 +280,69 @@ function component(width, height, color, x, y, speed, type) {
     			this.angle=1;
     			//bufferControl--;
     			this.y = this.type*itemSize;
-    			console.log("Buffer -:"+bufferControl);
-    			if(j<document.getElementById("Item2Produce").value)j++;
-    			console.log("Item arrived: "+j);
+    			//console.log("Buffer -:"+bufferControl);
+    			if(j+1<document.getElementById("Item2Produce").value){
+    				j++;
+    				console.log("Item consumed: "+j);
+    			}
+    			else{
+    				myGameArea.clear();
+    				consumerStatus="End"
+    				producer.update(producerStatus);
+    			   	consumer.update(consumerStatus);
+    			   	buffer.update(bufferControl);
+    				myGameArea.stop();
+    				console.log("Fim.");
+    			}
+    			
+    			
     		}
     		    	
     	}
     }
-
 }
-
 function updateGameArea() {
     myGameArea.clear();
-   	producer.update();
-   	consumer.update();
-   	buffer.update();
+   	producer.update(producerStatus);
+   	consumer.update(consumerStatus);
+   	buffer.update(bufferControl);
     
    	for(i=j;i<prod.length;i++)
    	{
-   		prod[i].move(dest,2);
+   		prod[i].move(dest,parseInt(document.getElementById("ProdAnimSpeed").value));
     	prod[i].update();
     }
-   	if(i>1){
+   	if(i>j+1){
+   		//if(bufferControl>0){
    	dest="move2consumer";
+   	consumerStatus="Running"
    	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));//1);//document.getElementById("ConsAnimSpeed").value);
 	prod[j].update();
-	dest="move2buffer";}
-   	//console.log(parseInt(document.getElementById("ConsAnimSpeed").value));
+	
+	dest="move2buffer";}//}
+   	
+   	else if(j+1==parseInt(document.getElementById("Item2Produce").value))
+   		{
+   		dest="move2consumer";
+   	   	consumerStatus="Running"
+   	   	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));//1);//document.getElementById("ConsAnimSpeed").value);
+   		prod[j].update(); 		
+   		dest="move2buffer";	
+   		}
+ 	
+   	else if(bufferControl==0)
+   		{
+   		consumerStatus="Blocked"
+   		//flag=1;
+   		}
+   
+	//console.log("i: "+i+" j: "+j);
 }
+   	//console.log(parseInt(document.getElementById("ConsAnimSpeed").value));
 
 /*---------------------------------------------
-
 	 Fancy thing  - get a random collor
-
 ---------------------------------------------*/
-
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
@@ -319,35 +351,30 @@ function getRandomColor() {
     }
     return color;
 }
-
-
 /*---------------------------------------------
-
 				Produce Item
-
 ---------------------------------------------*/
 function produceItem(){
-	if(i++<=document.getElementById("Item2Produce").value) 
+	if(i++<=parseInt(document.getElementById("Item2Produce").value)) 
 	{
-		console.log("Max: " + document.getElementById("Item2Produce").value);
+		console.log("B size: " + parseInt(document.getElementById("BufferSize").value));
 		var produceTimer = setInterval(function(){
-		if((bufferControl<document.getElementById("BufferSize").value)&(i<document.getElementById("Item2Produce").value) )
-			{
+		if((bufferControl<parseInt(document.getElementById("BufferSize").value))&(i<parseInt(document.getElementById("Item2Produce").value)) )
+			{console.log("B size: " + parseInt(document.getElementById("BufferSize").value)+" Actual: "+bufferControl);
 			prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,(i+1)));
 			dest="move2buffer";
-			bufferControl++;
+			//bufferControl++;
 			//consumeItem();
-			console.log("Produced..: "+i);
+			console.log("Produced..: "+i+1);
+			producerStatus="Running";
 			}
-		//else clearInterval(produceTimer);
-		},document.getElementById("ProdAnimSpeed").value)
-	}else clearInterval(produceTimer);	
+		else if(i==document.getElementById("Item2Produce").value) producerStatus="End";
+		else {producerStatus="Blocked";}// clearInterval(produceTimer);}
+		},2500)//document.getElementById("ProdAnimSpeed").value)
+	}else {clearInterval(produceTimer);	producerStatus="End";}
 }
-
 /*---------------------------------------------
-
 				Consume Item
-
 ---------------------------------------------*/
 /*
 function consumeItem(){
@@ -360,7 +387,6 @@ function consumeItem(){
 		    	}	
 			},1000);//document.getElementById("ConsAnimSpeed").value)
 }*/
-
 /* var toggle=1;
 setInterval(function(){
 	 
@@ -374,8 +400,6 @@ setInterval(function(){
 	}
 	
 }, 1000) */
-
-
 </script>
 
 </body>
