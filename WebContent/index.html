@@ -72,11 +72,6 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 	<tr>
 	<td>Speed
 	<input type="range" id="ProdAnimSpeed" min="3" max="13" value="3">
-<!-- 	<select id=ProdAnimSpeed > 
-	  <option value="3">Slow</option>
-	  <option value="5">Med.</option>
-	  <option value="7">Fast</option>
-	</select> -->
 	</td>
 
 <td>Size
@@ -89,11 +84,6 @@ estão à espera de ser despertado. O problema também pode ser generalizada par
 
 <td>Speed
 <input type="range" id="ConsAnimSpeed" min="1" max="10" value="1">
-<!-- <select id=ConsAnimSpeed > 
-  <option value="1">Slow</option>
-  <option value="2">Med.</option>
-  <option value="4">Fast</option>
-</select> -->
 </td>
 
 </tr>
@@ -165,6 +155,8 @@ var dest;
 var bufferPosIn=0;
 var producerStatus="Blocked";
 var consumerStatus="Blocked";
+var producerColor="red";
+var consumerColor="red";
 /*---------------------------------------------
   				Init  Functions
 ---------------------------------------------*/
@@ -189,7 +181,9 @@ function stopGame(){
 	dest;
 	bufferPosIn=0;
 	producerStatus="Blocked";
+	producerColor="red";
 	consumerStatus="Blocked";
+	consumerColor="red";
 	console.log("Aborted or Reseted :P")
 	//location.reload();
 }
@@ -223,9 +217,10 @@ function component(width, height, color, x, y, speed, type) {
     this.y = y;
     this.type=type;
    
-    this.update = function(item){
+    this.update = function(item,cor){
         ctx = myGameArea.context;
         ctx.fillStyle = color;
+        if(typeof cor != "undefined") ctx.fillStyle = cor;
         ctx.fillRect(this.x, this.y, this.width, this.height);
         
         ctx.font = "22px Arial";
@@ -279,6 +274,7 @@ function component(width, height, color, x, y, speed, type) {
     			else{
     				myGameArea.clear();
     				consumerStatus="End"
+    				ConsumerColor="grey";
     				producer.update(producerStatus);
     			   	consumer.update(consumerStatus);
     			   	buffer.update(bufferControl);
@@ -291,8 +287,8 @@ function component(width, height, color, x, y, speed, type) {
 }
 function updateGameArea() {
     myGameArea.clear();
-   	producer.update(producerStatus);
-   	consumer.update(consumerStatus);
+   	producer.update(producerStatus,producerColor);
+   	consumer.update(consumerStatus,consumerColor);
    	buffer.update(bufferControl);
     
    	for(i=j;i<prod.length;i++)
@@ -303,6 +299,7 @@ function updateGameArea() {
    	if(i>j+1){
    	dest="move2consumer";
    	consumerStatus="Running"
+    consumerColor="green";
    	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));//1);//document.getElementById("ConsAnimSpeed").value);
 	prod[j].update();
 	
@@ -312,6 +309,7 @@ function updateGameArea() {
    		{
    		dest="move2consumer";
    	   	consumerStatus="Running"
+   	   	ConusmerColor="green";
    	   	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));//1);//document.getElementById("ConsAnimSpeed").value);
    		prod[j].update(); 		
    		dest="move2buffer";	
@@ -320,6 +318,7 @@ function updateGameArea() {
    	else if(bufferControl==0)
    		{
    		consumerStatus="Blocked"
+   		consumerColor="red";
    		}
 
 }
@@ -350,9 +349,10 @@ function produceItem(){
 			dest="move2buffer";
 			console.log("Produced: "+(i+1));
 			producerStatus="Running";
+			producerColor="green";
 			}
-		else if(i==document.getElementById("Item2Produce").value) producerStatus="End";
-		else {producerStatus="Blocked";}
+		else if(i==document.getElementById("Item2Produce").value) {producerStatus="End"; producerColor="grey";}
+		else {producerStatus="Blocked"; producerColor="red";}
 		},2500);
 	}//else {clearInterval(produceTimer);	producerStatus="End";}
 }
@@ -363,6 +363,8 @@ function produceItem(){
   <p>Created by: Julio Santos</p>
   <p>PPGCA</p>
   <p>Contact information: <a href="mailto:julio.ppgca@gmail.com">julio.ppgca@gmail.com</a>.</p>
+  <p>Ref.1: <a href="http://www.w3schools.com/graphics/game_intro.asp">w3schools html game</a> </p>
+  <p>Ref.2: <a href="https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem">Wikipedia</a> </p>
 </footer>
 </body>
 </html>
