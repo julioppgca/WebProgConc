@@ -1,10 +1,12 @@
 table#t01 {
    width: 800px;
+   margin: auto;
 }
 
 th, td {
 	width:266px;
     padding: 5px;
+    margin: auto;
     text-align: center;
 }
 table#t01 tr:nth-child(even) {
@@ -20,12 +22,14 @@ table#t01 th {
 
 #headerE{
 	width: 800px;
+	margin: auto;
 	 text-align: center;
 	 border:2px solid #d3d3d3;
 }
 
 #headerP{
 	width: 800px;
+	margin: auto;
 	 text-align: center;
 	 border:2px solid #d3d3d3;
 }
@@ -33,12 +37,14 @@ table#t01 th {
 
 #textP{
 	width: 800px;
+	margin: auto;
 	text-align: justify;
 	
 }
 
 #textE{
 	width: 800px;
+	margin: auto;
 	text-align: justify;
 }
 
@@ -47,7 +53,12 @@ table#t01 th {
   height: 400px;
   position: relative;
   background: lightgrey;
-   border:2px solid #d3d3d3;
+  border:2px solid #d3d3d3;
+   padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 #producer {
