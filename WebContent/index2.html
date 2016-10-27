@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="styles/styles.css">
+
+<title>Producer Consumer Animation - PPGCA</title>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:10px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+
+
+<body>
+
+<table id="t01">
+	<tr>
+		<th> <button onclick="ChangeLangPor()">Português</button> </th>
+		<th> <button onclick="ChangeLangEng()">English</button>  </th>
+	</tr>
+</table>
+
+<H1 id="headerE"> Producer Consumer Problem</H1>
+<H1 id="headerP" hidden=true> O Problema do Produtor e Consumidor</H1>
+<div id=textE> 
+&emsp;In computing, the producer–consumer problem (also known as the bounded-buffer problem) 
+is a classic example of a multi-process synchronization problem. The problem describes two processes, 
+the producer and the consumer, who share a common, fixed-size buffer used as a queue. 
+The producer's job is to generate data, put it into the buffer, and start again. At the same time, 
+the consumer is consuming the data (i.e., removing it from the buffer), 
+one piece at a time. The problem is to make sure that the producer won't try to add data into the buffer 
+if it's full and that the consumer won't try to remove data from an empty buffer.
+<br>
+&emsp;The solution for the producer is to either go to sleep or discard data if the buffer is full. 
+The next time the consumer removes an item from the buffer, it notifies the producer, 
+who starts to fill the buffer again. In the same way, the consumer can go to sleep if it 
+finds the buffer to be empty. The next time the producer puts data into the buffer, 
+it wakes up the sleeping consumer. The solution can be reached by means of inter-process communication, 
+typically using semaphores. An inadequate solution could result in a deadlock where both processes 
+are waiting to be awakened. The problem can also be generalized to have multiple producers and consumers.
+<br>
+&emsp;To get a better understand of the problem, an interactive simulation is provided below. 
+You can set parameters like production speed, number of items to be produced, buffer size and consumer speed. 
+After all settings has been done please click in "Go" button to start simulation. 
+You can change the parameter of the simulation anytime you want.
+A new simulation can be started either by pressing reset or updating the html page.
+<br>
+</div>
+<div id="textP" hidden=true>
+&emsp;Em computação, o problema do produtor-consumidor (também conhecido como o problema limitado-tampão)
+é um exemplo clássico de um problema de sincronização multi-processo. O problema descreve dois processos,
+o produtor eo consumidor, que compartilham um buffer comum, de tamanho fixo usado como uma fila.
+O trabalho do produtor é gerar dados, colocá-lo no buffer, e começar novamente. Ao mesmo tempo,
+o consumidor está a consumir os dados (isto é, retirando-a do tampão),
+uma peça de cada vez. O problema é ter certeza de que o produtor não vai tentar adicionar dados para o buffer
+Se ele está cheio e que o consumidor não vai tentar remover dados de um buffer vazio.
+<br>
+&emsp;A solução para o produtor, quer seja para ir dormir ou descartar dados se o buffer está cheio.
+A próxima vez que o consumidor retira um item do buffer, ele notifica o produtor,
+que começa a encher de novo o tampão. Da mesma forma, o consumidor pode ir dormir se
+encontra o buffer estar vazio. A próxima vez que o produtor coloca os dados no buffer,
+acorda o consumidor dormir. A solução pode ser alcançada por meio de comunicação entre processos,
+tipicamente utilizando semáforos. Uma solução inadequada poderia resultar num bloqueio em que ambos os processos
+estão à espera de ser despertado. O problema também pode ser generalizada para ter vários produtores e consumidores.
+<br>
+&emsp;Para obter uma melhor compreensão do problema, uma simulação interativa é fornecida abaixo. 
+Você pode definir os parâmetros como a velocidade de produção, número de itens a serem produzidos, 
+tamanho de buffer e a velocidade do consumidor. Após todos os ajustes tem sido feitos, clique em "Go" 
+para iniciar a simulação. Você pode mudar os parâmetros de simulação a qualquer momento que desejar. 
+Uma nova simulação pode ser iniciada pressionando "Reset" ou atualizando a página HTML.
+</div>
+
+<br>
+<table id="t01" >
+  <tr>
+    <th colspan="2" id="prod">Producer</th>
+    <th colspan="2" >Buffer</th> 
+    <th colspan="2" id="cons">Consumer</th>
+  </tr>
+	  
+  <tr>
+	<td id="prodSpeed">Speed
+	<td> <input type="range" id="ProdAnimSpeed" min="3" max="13" value="3">
+  </td>
+
+<td id="bSize">Size
+<td>	<select id=BufferSize > 
+	  <option value="3">3 Pos.</option>
+	  <option value="5">5 Pos.</option>
+	  <option value="7">7 Pos.</option>
+	</select>
+</td>
+
+<td id="consSpeed">Speed
+<td><input type="range" id="ConsAnimSpeed" min="1" max="10" value="1">
+</td>
+
+</tr>
+
+<tr>
+<td id="i2Produce">Produce
+ <td><select id=Item2Produce > 
+  <option value="3">10 Items</option>
+  <option value="15">15 Items</option>
+  <option value="25">25 Items</option>
+</select>
+</td>
+
+<td> 
+<button onclick="stopGame()">Reset</button>
+<button onclick="startGame()">Go</button>
+</td>
+
+<td> 
+</td>
+</tr>
+
+</table>
+
+<canvas id="container"></canvas>
+
+<script>
+/*---------------------------------------------
+ 
+ 			Language Settings
+ 
+ ---------------------------------------------*/
+function ChangeLangPor(){
+	document.getElementById("headerP").hidden=false;
+	document.getElementById("textP").hidden=false;
+	document.getElementById("textE").hidden=true;
+	document.getElementById("headerE").hidden=true;
+	
+	document.getElementById("prod").innerHTML="Produtor";
+	document.getElementById("cons").innerHTML="Consumidor";
+	document.getElementById("prodSpeed").innerHTML="Velocidade";
+	document.getElementById("consSpeed").innerHTML="Velocidade";
+	document.getElementById("i2Produce").innerHTML="Produzir";
+	document.getElementById("bSize").innerHTML="Tamanho do Buffer";
+}
+function ChangeLangEng(){
+	document.getElementById("headerP").hidden=true;
+	document.getElementById("textP").hidden=true;
+	document.getElementById("textE").hidden=false;
+	document.getElementById("headerE").hidden=false;
+	
+	document.getElementById("prod").innerHTML="Producer";
+	document.getElementById("cons").innerHTML="Consumer";
+	document.getElementById("prodSpeed").innerHTML="Speed";
+	document.getElementById("consSpeed").innerHTML="Speed";
+	document.getElementById("i2Produce").innerHTML="Produce";
+	document.getElementById("bSize").innerHTML="Buffer Size";
+}
+/*---------------------------------------------
+		Constant Parameters Definition
+---------------------------------------------*/
+//Animate speed adjust
+const AnimateSpeed = 20;
+//limits
+const maxX=800;
+const maxY=400;
+const bufferXsize=65;
+const bufferYsize=400;
+const bufferXpos=maxX/2-bufferXsize/2;
+const bufferYpos=0;
+const itemSize=50;
+/*---------------------------------------------
+			Global Variables
+---------------------------------------------*/
+var producer;
+var consumer;
+var buffer;
+var bufferControl=0;
+var prod=[];
+var i = 0;
+var j = 0;
+var dest;
+var bufferPosIn=0;
+var producerStatus="Blocked";
+var consumerStatus="Blocked";
+var producerColor="red";
+var consumerColor="red";
+/*---------------------------------------------
+  				Init  Functions
+---------------------------------------------*/
+function startGame() {
+  	console.log("Starting...");
+    myGameArea.start();
+    produceItem();
+    producer=new component(150, 300,  "grey" , 0, 50, 0, "Producer");
+    consumer=new component(150, 300, "grey", 650, 50, 0, "Consumer");
+    buffer=new component(bufferXsize, bufferYsize, "#729fcf",bufferXpos, bufferYpos, 0, "Buffer");
+    
+}
+function stopGame(){
+	myGameArea.stop();
+	myGameArea.clear();
+	for (var i = 1; i < 10; i++)
+        window.clearInterval(i);
+	bufferControl=0;
+	prod=[];
+	i = 0;
+	j = 0;
+	dest;
+	bufferPosIn=0;
+	producerStatus="Blocked";
+	producerColor="red";
+	consumerStatus="Blocked";
+	consumerColor="red";
+	console.log("Aborted or Reseted :P")
+	//location.reload();
+}
+var myGameArea = {
+	    //canvas : document.createElement("canvas"),
+	    canvas : document.getElementById("container"),
+	    start : function() {
+	        this.canvas.width = 800;
+	        this.canvas.height = 400;
+	        this.context = this.canvas.getContext("2d");
+	        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+	        this.frameNo = 0;
+	        this.interval = setInterval(updateGameArea, AnimateSpeed); 
+	    },
+	    stop : function() {
+	        clearInterval(this.interval);
+	    },    
+	    clear : function() {
+	        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	    }
+	}
+	
+function component(width, height, color, x, y, speed, type) {
+    this.width = width;
+    this.height = height;
+    this.angle = 0;
+    this.speed = speed;
+    this.buffer = 0;
+    this.lbuffer = 0;
+    this.x = x;
+    this.y = y;
+    this.type=type;
+   
+    this.update = function(item,cor){
+        ctx = myGameArea.context;
+        ctx.fillStyle = color;
+        if(typeof cor != "undefined") ctx.fillStyle = cor;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        
+        ctx.font = "22px Arial";
+        if(type) {
+        	ctx.fillStyle = "white";
+        	ctx.textAlign = "center";
+   			if(typeof item != "undefined") {
+        		ctx.fillText(type,this.x+this.width/2,this.y+20);//+this.height/2); 
+        		ctx.fillStyle = "yellow";
+        		ctx.fillText(item,this.x+this.width/2,this.y+42);//+this.height/2);
+        		}
+        	else ctx.fillText(type,this.x+this.width/2,this.y+20);//this.height/2);
+        }
+    }
+    this.newPos = function() {
+        this.x += this.speed * Math.sin(this.angle);
+        this.y -= this.speed * Math.cos(this.angle);
+    }
+    
+    this.move = function(dest,speed){
+    	if(dest=="move2buffer")
+    	{
+    	if(this.x<(bufferXpos+bufferXsize/2)-itemSize/2)	this.x +=speed;
+    	else if (this.buffer==0){
+    			bufferControl++;
+    			bufferPosIn++;
+    			this.y = bufferPosIn*itemSize;
+    			if(bufferPosIn>=parseInt(document.getElementById("BufferSize").value)) bufferPosIn=0;
+    			this.buffer=1;
+    			this.lbuffer=1;
+    		console.log("Buffer Count:" + bufferControl);	
+    		}
+    	}
+    	else if(dest=="move2consumer")
+    	{
+    		if((this.x<700)){
+    			this.y = 150;
+    			this.x +=speed; 
+ 				if(this.lbuffer==1){
+ 					this.lbuffer=0;
+ 					bufferControl--;
+ 				}
+    		}
+    		else if(this.angle == 0){
+    			this.angle=1;
+    			this.y = this.type*itemSize;
+    			if(j+1<document.getElementById("Item2Produce").value){
+    				j++;
+    				console.log("Item consumed: "+j);
+    			}
+    			else{
+    				myGameArea.clear();
+    				//sleep(500);
+    				consumerStatus="End"
+    				consumerColor="grey";
+    				producerStatus="End"
+        			producerColor="grey";
+    				producer.update(producerStatus);
+    			   	consumer.update(consumerStatus);
+    			   	buffer.update(bufferControl);
+    			   	
+    				myGameArea.stop();
+    				//sleep(1500);
+    				//myGameArea.clear();
+    				console.log("End.");
+    			}			
+    		}	    	
+    	}
+    }
+}
+function updateGameArea() {
+    myGameArea.clear();
+   	producer.update(producerStatus,producerColor);
+   	consumer.update(consumerStatus,consumerColor);
+   	buffer.update(bufferControl);
+    
+   	for(i=j;i<prod.length;i++)
+   	{
+   		prod[i].move(dest,parseInt(document.getElementById("ProdAnimSpeed").value));
+    	prod[i].update();
+    }
+   	if(i>j+1)
+   		{
+   		dest="move2consumer";
+   		consumerStatus="Running"
+    	consumerColor="green";
+   		prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));
+		prod[j].update();
+		dest="move2buffer";
+		}
+   	
+   	else if(j+1==parseInt(document.getElementById("Item2Produce").value))
+   		{
+ 		console.log("last one to eat!")
+   		dest="move2consumer";
+   	   	consumerStatus="Running"
+   	   	ConusmerColor="green";
+   	   	prod[j].move(dest,parseInt(document.getElementById("ConsAnimSpeed").value));
+   		prod[j].update(); 		
+   		dest="move2buffer";	 
+   		}
+ 	
+   	else if(bufferControl==0)
+   		{
+   		consumerStatus="Blocked"
+   		consumerColor="red";
+   		}
+}
+   	
+/*---------------------------------------------
+ 				Simple delay
+---------------------------------------------*/
+function sleep(milliseconds) {
+	  var start = new Date().getTime();
+	  for (var i = 0; i < 1e7; i++) {
+	    if ((new Date().getTime() - start) > milliseconds){
+	      break;
+	    }
+	  }
+	}
+   	
+/*---------------------------------------------
+	 Fancy thing  - get a random collor
+---------------------------------------------*/
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+/*---------------------------------------------
+				Produce Item
+---------------------------------------------*/
+function produceItem(){
+	if(i++<=parseInt(document.getElementById("Item2Produce").value)) 
+	{
+		console.log("B size: " + parseInt(document.getElementById("BufferSize").value));
+		var produceTimer = setInterval(function(){
+		if((bufferControl<parseInt(document.getElementById("BufferSize").value))&(i<parseInt(document.getElementById("Item2Produce").value)) )
+			{console.log("B size: " + parseInt(document.getElementById("BufferSize").value)+" Actual: "+bufferControl);
+			prod.push(new component(itemSize, itemSize, getRandomColor(), 120, 150,1,(i+1)));
+			dest="move2buffer";
+			console.log("Produced: "+(i+1));
+			producerStatus="Running";
+			producerColor="green";
+			//if(i>=document.getElementById("Item2Produce").value+1) {producerStatus="End"; producerColor="grey";}
+			}
+		else if(i>=document.getElementById("Item2Produce").value) {producerStatus="End"; producerColor="grey";}
+		else {producerStatus="Blocked"; producerColor="red";}
+		},2500);
+	}//else {clearInterval(produceTimer);	producerStatus="End";}
+}
+</script>
+
+<footer>
+  <p>Created by: Julio Santos</p>
+  <p>PPGCA</p>
+  <p>Contact information: <a href="mailto:julio.ppgca@gmail.com">julio.ppgca@gmail.com</a>.</p>
+  <p>Ref.1: <a href="http://www.w3schools.com/graphics/game_intro.asp">w3schools html game</a> </p>
+  <p>Ref.2: <a href="https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem">Wikipedia</a> </p>
+</footer>
+</body>
+</html>
